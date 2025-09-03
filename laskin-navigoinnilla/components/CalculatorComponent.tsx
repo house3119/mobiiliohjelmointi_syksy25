@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { View, TextInput, Text, StyleSheet, Pressable } from "react-native";
 
-export default function LaskinComponent({ navigation }) {
+export default function CalculatorComponent({ navigation }) {
   const [number1, setNumber1] = useState<string>('');
   const [number2, setNumber2] = useState<string>('');
   const [result, setResult] = useState<string>('');
@@ -92,7 +92,7 @@ export default function LaskinComponent({ navigation }) {
 
           <Pressable
             style={styles.btnHistory}
-            onPress={() => navigation.navigate('Historia', { history: history})}>
+            onPress={() => navigation.navigate('History', { history: history})}>
             <Text style={styles.btnText}>
               History
             </Text>

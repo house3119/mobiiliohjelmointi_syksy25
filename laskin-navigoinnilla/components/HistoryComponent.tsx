@@ -1,6 +1,6 @@
 import { View, Text, FlatList, StyleSheet } from "react-native";
 
-export default function HistoriaComponent({ route }) {
+export default function HistoryComponent({ route }) {
   const { history } = route.params;
 
   return(
