@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { View, TextInput, Button, FlatList, Text, StyleSheet } from "react-native";
+import { View, TextInput, Text, StyleSheet, Pressable } from "react-native";
 
 export default function LaskinComponent({ navigation }) {
   const [number1, setNumber1] = useState<string>('');
@@ -8,7 +8,6 @@ export default function LaskinComponent({ navigation }) {
   const [history, setHistory] = useState<string[]>([]);
 
   const numbInput1Ref = useRef(null);
-  const numbInput2Ref = useRef(null);
 
   const calculate = (oper: string) => {
     if (!number1 || !number2) {
@@ -61,16 +60,12 @@ export default function LaskinComponent({ navigation }) {
             autoFocus={true}
             value={number1}
             ref={numbInput1Ref}
-            onChangeText={numb => {
-              setNumber1(numb);
-              numbInput2Ref.current.focus();
-            }}
+            onChangeText={numb => setNumber1(numb)}
             style={styles.numberInput}
             keyboardType='numeric'
             placeholder='Number 1' />
           <TextInput
             value={number2}
-            ref={numbInput2Ref}
             onChangeText={numb => setNumber2(numb)}
             style={styles.numberInput}
             keyboardType='numeric'
@@ -79,17 +74,29 @@ export default function LaskinComponent({ navigation }) {
 
         {/* Buttons */}
         <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
-          <Button
-            onPress={() => calculate('+')}
-            title='+' />
-            
-          <Button
-            onPress={() => calculate('-')}
-            title='-' />
+          <Pressable
+            style={styles.btnCalc}
+            onPress={() => calculate('+')}>
+            <Text style={styles.btnText}>
+              +
+            </Text>
+          </Pressable>
 
-          <Button
-            onPress={() => navigation.navigate('Historia', { history: history})}
-            title='History'/>
+          <Pressable
+            style={styles.btnCalc}
+            onPress={() => calculate('-')}>
+            <Text style={styles.btnText}>
+              -
+            </Text>
+          </Pressable>
+
+          <Pressable
+            style={styles.btnHistory}
+            onPress={() => navigation.navigate('Historia', { history: history})}>
+            <Text style={styles.btnText}>
+              History
+            </Text>
+          </Pressable>
         </View>
       </View>
     </View>
@@ -109,5 +116,25 @@ const styles = StyleSheet.create({
   },
   listHeader: {
     fontWeight: 600
+  },
+  btnCalc: {
+    width: 30,
+    backgroundColor: '#0d6efd',
+    marginTop: 15,
+    marginEnd: 5,
+    alignItems: 'center',
+    padding: 5,
+    borderRadius: 6
+  },
+  btnHistory: {
+    width: 65,
+    backgroundColor: '#0d6efd',
+    marginTop: 15,
+    alignItems: 'center',
+    padding: 5,
+    borderRadius: 6
+  },
+  btnText: {
+    color: 'white'
   }
 })
