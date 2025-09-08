@@ -64,7 +64,7 @@ export default function App() {
               </View>
             } />
         : (list.length === 0 && searched) ?
-          <Text>
+          <Text style={styles.emptyListText}>
             Nothing found
           </Text>
         : null}
@@ -124,6 +124,10 @@ const styles = StyleSheet.create({
   listText: {
     marginBottom: 2,
     fontWeight: 500
+  },
+  emptyListText: {
+    marginTop: 12,
+    paddingTop: 4
   },
   listImage: {
     height: 100,
