@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useRef, useState } from 'react';
 import { StyleSheet, Text, View, TextInput, Pressable, FlatList, Image } from 'react-native';
 
-const mealApiUrl = 'https://www.themealdb.com/api/json/v1/1/filter.php'
+const mealApiUrl = 'https://www.themealdb.com/api/json/v1/1/filter.php';
 
 export default function App() {
   const [query, setQuery] = useState('');
@@ -13,21 +13,19 @@ export default function App() {
 
   const search = () => {
     fetch(`${mealApiUrl}?i=${query}`)
-    .then(res => res.json())
-    .then(data => {
-      console.log(data.meals)
-      const holder = [];
-      if (data.meals) {
-        data.meals.forEach(element => {
-          holder.push(element)
-        });
-      }
-      setList(holder)
-      setSearched(true)
-      console.log(list)
+      .then(res => res.json())
+      .then(data => {
+        const holder = [];
+        if (data.meals) {
+          data.meals.forEach(meal => {
+            holder.push(meal);
+          })
+        }
+        setList(holder);
+        setSearched(true);
     })
     .catch(err => console.error(err))
-  };
+  }
 
   return (
     <View style={styles.container}>
@@ -55,18 +53,16 @@ export default function App() {
             data={list}
             renderItem={({item}) =>
               <View style={styles.listItem}>
-                <Text style={{marginBottom: 2, fontWeight: 500}}>
+                <Text style={styles.listText}>
                   {item.strMeal}
                 </Text>
                 <Image
-                style={{height: 100, width: 100}}
+                style={styles.listImage}
                   source={{
                     uri: item.strMealThumb
-                  }}
-                />
+                  }} />
               </View>
-            }
-          />
+            } />
         : (list.length === 0 && searched) ?
           <Text>
             Nothing found
@@ -124,5 +120,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'lightgrey',
     width: 300
+  },
+  listText: {
+    marginBottom: 2,
+    fontWeight: 500
+  },
+  listImage: {
+    height: 100,
+    width: 100
   }
 });
