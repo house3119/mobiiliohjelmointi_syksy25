@@ -7,7 +7,6 @@ import axios from 'axios';
 const geoBaseUrl = 'https://geocode.maps.co/search';
 const googlePlacesBaseUrl = 'https://places.googleapis.com/v1/places:searchNearby';
 
-
 export default function App() {
   const [address, setAddress] = useState('');
   const [region, setRegion] = useState({
@@ -19,14 +18,15 @@ export default function App() {
   const [markers, setMarkers] = useState([]);
 
   useEffect(() => {
-
   }, []);
 
   const moveToAddress = async () => {
-    let response = await axios.get(`${geoBaseUrl}?q=${address}&api_key=${process.env.EXPO_PUBLIC_API_KEY}`);
+    // Get and set address data
+    const response = await axios.get(`${geoBaseUrl}?q=${address}&api_key=${process.env.EXPO_PUBLIC_API_KEY}`);
     const regionData = response.data[0];
     setRegion({...region, latitude: regionData.lat, longitude: regionData.lon});
 
+    // Get restaurant data and set markers
     const restaurantData = await axios.post(googlePlacesBaseUrl, {
       "includedTypes": ["restaurant"],
       "maxResultCount": 10,
@@ -46,23 +46,34 @@ export default function App() {
         "X-Goog-FieldMask": "places.displayName,places.location,places.formattedAddress"
       }
     });
-    const markerData = restaurantData.data.places.map(place => ({name: place.displayName.text, latitude: place.location.latitude, longitude: place.location.longitude, adr: place.formattedAddress}));
+    const markerData = restaurantData.data.places.map(place => ({
+      name: place.displayName.text,
+      latitude: place.location.latitude,
+      longitude: place.location.longitude,
+      adr: place.formattedAddress
+    }));
     setMarkers(markerData);
   };
 
   return (
     <View style={styles.container}>
       <MapView
-        style={{ width: '100%', height: '55%' }} 
+        style={styles.map} 
         region={region} >
-        {markers.length !== 0 && markers.map((marker, index) => <Marker key={index} coordinate={{latitude: marker.latitude, longitude: marker.longitude}}>
-          <Callout>
-            <View style={{height: 'fit-content', width: 200}}>
-              <Text style={{fontWeight: 600}}>{marker.name}</Text>
-              <Text>{marker.adr}</Text>
-            </View>
-          </Callout>
-        </Marker>)}
+        {markers.length !== 0 && markers.map((marker, index) =>
+          <Marker key={index} coordinate={{latitude: marker.latitude, longitude: marker.longitude}}>
+            <Callout>
+              <View style={styles.map.callout}>
+                <Text style={styles.map.callout.headerText}>
+                  {marker.name}
+                </Text>
+                <Text>
+                  {marker.adr}
+                </Text>
+              </View>
+            </Callout>
+          </Marker>
+        )}
       </MapView>
 
       <TextInput
@@ -79,7 +90,7 @@ export default function App() {
           <Text style={styles.btnText}>
             Show
           </Text>
-        </Pressable>
+        </Pressable>     
       </View>
 
       <StatusBar style="auto" />
@@ -116,6 +127,13 @@ const styles = StyleSheet.create({
   },
   map: {
     width: '100%',
-    height: '55%'
+    height: '55%',
+    callout: {
+      height: 'fit-content',
+      width: 200,
+      headerText: {
+        fontWeight: 600
+      }
+    }
   }
 });
