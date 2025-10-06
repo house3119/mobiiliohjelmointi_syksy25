@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Pressable, FlatList, Image, TouchableHighlight } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Pressable, FlatList, Image, TouchableHighlight, Button } from 'react-native';
 
 const DIFFICULTY = 'beginner';
 
@@ -27,6 +27,7 @@ export default function App() {
       }
     }
     setBoard(holder);
+    populateMines(0,0);
   }
 
   const populateMines = (x, y) => {
@@ -48,24 +49,203 @@ export default function App() {
       }
       return holder;
     })
+    setNumbers();
     setPopulated(true);
   }
 
-  const openCell = (x, y) => {
-    if (!populated) {
-      populateMines(x, y);
-    }
-
+  const setNumbers = () => {
     setBoard(current => {
       const holder = current.map(row => row.map(cell => ({...cell})));
-      console.log('x: ' + x, 'y: ' + y);
+      for (let i = 0; i < holder.length; i++) {
+        for (let j = 0; j < holder[i].length; j++) {
+          let counter = 0;
 
-      holder[x][y].opened = true;
+          //Top left
+          try {
+            if (holder[i-1][j-1].mine) {
+              counter++;
+            }
+          } catch(err) {
+
+          }
+
+          // Top
+          try {
+            if (holder[i-1][j].mine) {
+              counter++;
+            }
+          } catch(err) {
+
+          }
+
+          // Top right
+          try {
+            if (holder[i-1][j+1].mine) {
+              counter++;
+            }
+          } catch(err) {
+
+          }
+
+          // Right
+          try {
+            if (holder[i][j+1].mine) {
+              counter++;
+            }
+          } catch(err) {
+
+          }
+
+          // Bottom-right
+          try {
+            if (holder[i+1][j+1].mine) {
+              counter++;
+            }
+          } catch(err) {
+
+          }
+
+          // Bottom
+          try {
+            if (holder[i+1][j].mine) {
+              counter++;
+            }
+          } catch(err) {
+
+          }
+
+          // Bottom-left
+          try {
+            if (holder[i+1][j-1].mine) {
+              counter++;
+            }
+          } catch(err) {
+
+          }
+
+          // Left
+          try {
+            if (holder[i][j-1].mine) {
+              counter++;
+            }
+          } catch(err) {
+
+          }
+
+          if (holder[i][j].mine) {
+            holder[i][j].around = -1;
+          } else {
+            holder[i][j].around = counter;
+          }
+          
+          // console.log('i: ' + i + ', j: ' + j);
+          // console.log('mines: ' + counter);
+        }
+      }
       return holder;
     })
+  }
 
+  const openCell = (x, y) => {
 
+    setBoard(curr => {
+      const holder = curr.map(row => row.map(cell => ({...cell})));
+      
+      const open = (x, y) => {
+        holder[x][y].opened = true;
+        if (holder[x][y].around === 0) {
+          // Top left
+          if (x === 0 && y === 0) {
+            // console.log('top left')
+            holder[x][y+1].opened? '' : open(x,y+1);
+            holder[x+1][y].opened? '' : open(x+1,y);
+            holder[x+1][y+1].opened? '' : open(x+1,y+1);
+          }
 
+          // Top right
+          else if (x === 0 && y === 9) {
+            // console.log('top right')
+            holder[x][y-1].opened? '' : open(x,y-1);
+            holder[x+1][y].opened? '' : open(x+1,y);
+            holder[x+1][y-1].opened? '' : open(x+1,y-1);
+          }
+
+          // Bottom left
+          else if (x === 9 && y === 0) {
+            // console.log('bottom left')
+            holder[x][y+1].opened? '' : open(x,y+1);
+            holder[x-1][y].opened? '' : open(x-1,y);
+            holder[x-1][y+1].opened? '' : open(x-1,y+1);
+          }
+
+          // Bottom right
+          else if (x === 9 && y === 9) {
+            // console.log('bottom right')
+            holder[x][y-1].opened? '' : open(x,y-1);
+            holder[x-1][y-1].opened? '' : open(x-1,y-1);
+            holder[x-1][y].opened? '' : open(x-1,y);
+          }
+
+          // Left
+          else if (x > 0 && x < 9 && y === 0) {
+            // console.log('left')
+            holder[x][y+1].opened? '' : open(x,y+1);
+            holder[x-1][y].opened? '' : open(x-1,y);
+            holder[x-1][y+1].opened? '' : open(x-1,y+1);
+            holder[x+1][y].opened? '' : open(x+1,y);
+            holder[x+1][y+1].opened? '' : open(x+1,y+1);
+
+          }
+
+          // Right
+          else if (y === 9 && x !== 0) {
+            // console.log('right')
+            holder[x-1][y].opened? '' : open(x-1, y);
+            holder[x+1][y].opened? '' : open(x+1, y);
+            holder[x][y-1].opened? '' : open(x, y-1);
+            holder[x-1][y-1].opened? '' : open(x-1, y-1);
+            holder[x+1][y-1].opened? '' : open(x+1, y-1);
+          }
+
+          // Top
+          else if (x === 0) {
+            // console.log('top')
+            holder[x][y+1].opened? '' : open(x, y+1);
+            holder[x][y-1].opened? '' : open(x, y-1);
+            holder[x+1][y].opened? '' : open(x+1, y);
+            holder[x+1][y+1].opened? '' : open(x+1, y+1);
+            holder[x+1][y-1].opened? '' : open(x+1, y-1);
+          }
+
+          // Bottom
+          else if (x === 9) {
+            // console.log('bottom')
+            holder[x][y+1].opened? '' : open(x, y+1);
+            holder[x][y-1].opened? '' : open(x, y-1);
+            holder[x-1][y-1].opened? '' : open(x-1, y-1);
+            holder[x-1][y].opened? '' : open(x-1, y);
+            holder[x-1][y+1].opened? '' : open(x-1, y+1);
+            // open(x,y-1)
+          }
+
+          // Middle
+          else {
+            // console.log('middle')
+            holder[x][y+1].opened? '' : open(x, y+1);
+            holder[x][y-1].opened? '' : open(x, y-1);
+            holder[x-1][y-1].opened? '' : open(x-1, y-1);
+            holder[x-1][y].opened? '' : open(x-1, y);
+            holder[x-1][y+1].opened? '' : open(x-1, y+1);
+            holder[x+1][y].opened? '' : open(x+1, y);
+            holder[x+1][y+1].opened? '' : open(x+1, y+1);
+            holder[x+1][y-1].opened? '' : open(x+1, y-1);
+          }
+        }
+      }
+      open(x,y);
+
+      return holder;
+    })
   }
 
   const getImage = (x, y) => {
@@ -75,9 +255,26 @@ export default function App() {
           <Image style={styles.cellImg} source={require('./assets/mine_icon-01.png')}/>
         )
       } else {
-        return (
-          <Image style={styles.cellImg} source={require('./assets/grey.png')}/>
-        )
+        switch (board[x][y].around) {
+          case 0:
+            return <Image style={styles.cellImg} source={require('./assets/grey.png')}/>;
+          case 1:
+            return <Image style={styles.cellImg} source={require('./assets/number_1_icon-01.png')}/>;
+          case 2:
+            return <Image style={styles.cellImg} source={require('./assets/number_2_icon-01.png')}/>;
+          case 3:
+            return <Image style={styles.cellImg} source={require('./assets/number_3_icon-01.png')}/>;
+          case 4:
+            return <Image style={styles.cellImg} source={require('./assets/number_4_icon-01.png')}/>;
+          case 5:
+            return <Image style={styles.cellImg} source={require('./assets/number_5_icon-01.png')}/>;
+          case 6:
+            return <Image style={styles.cellImg} source={require('./assets/number_6_icon-01.png')}/>;
+          case 7:
+            return <Image style={styles.cellImg} source={require('./assets/number_7_icon-01.png')}/>;
+          case 8:
+            return <Image style={styles.cellImg} source={require('./assets/number_8_icon-01.png')}/>;
+        }
       }
     } else {
       return (
@@ -97,6 +294,7 @@ export default function App() {
           )}
         </View>
       )}
+      <Button title='Reset' onPress={createBoard}/>
     </View>
   )
 }
