@@ -7,10 +7,26 @@ const DIFFICULTY = 'beginner';
 export default function App() {
   const [board, setBoard] = useState(null);
   const [populated, setPopulated] = useState(false);
+  const [game, setGame] = useState({});
 
   useEffect(() => {
     createBoard(DIFFICULTY);
+    setupGame();
   }, [])
+
+  useEffect(() => {
+    checkWin()
+  }, [board])
+
+  const setupGame = () => {
+    setGame({
+      difficulty: 'beginner',
+      win: false,
+      lost: false,
+      time: 0,
+      message: ''
+    })
+  }
 
   const createBoard = (difficulty) => {
     const cell = {
@@ -137,13 +153,52 @@ export default function App() {
           } else {
             holder[i][j].around = counter;
           }
-          
-          // console.log('i: ' + i + ', j: ' + j);
-          // console.log('mines: ' + counter);
         }
       }
       return holder;
     })
+  }
+
+  const checkWin = () => {
+    if (board) {
+      let win = true;
+      board.forEach(row => {
+        row.forEach(cell => {
+          // Check all cells without mines
+          if (cell.mine === false) {
+
+            if (cell.opened) {
+
+            } else if (cell.flag && cell.mine) {
+
+            } else {
+              win = false;
+            }
+
+
+          }
+        })
+      })
+
+      if (win) {
+        setGame({...game, win: true, message: 'YOU WIN!'})
+      }
+    }
+
+  }
+
+  const flagCell = (x, y) => {
+    const holder = board.map(row => row.map(cell => ({...cell})));
+    
+    if (!holder[x][y].opened) {
+      if (holder[x][y].flag) {
+        holder[x][y].flag = false;
+      } else {
+        holder[x][y].flag = true;
+      }
+    }
+
+    setBoard(holder);
   }
 
   const openCell = (x, y) => {
@@ -153,6 +208,7 @@ export default function App() {
       
       const open = (x, y) => {
         holder[x][y].opened = true;
+
         if (holder[x][y].around === 0) {
           // Top left
           if (x === 0 && y === 0) {
@@ -242,17 +298,26 @@ export default function App() {
           }
         }
       }
-      open(x,y);
+
+      // Don't open flagged cells
+      if (!holder[x][y].flag) {
+        open(x,y);
+      }
+      
 
       return holder;
     })
+
+    if (board[x][y].mine) {
+      setGame({...game, lost: true, message: 'GAME OVER'})
+    }
   }
 
   const getImage = (x, y) => {
     if (board[x][y].opened) {
       if (board[x][y].mine) {
         return (
-          <Image style={styles.cellImg} source={require('./assets/mine_icon-01.png')}/>
+          <Image style={styles.cellImg} source={require('./assets/mine_icon-01-red.png')}/>
         )
       } else {
         switch (board[x][y].around) {
@@ -277,9 +342,11 @@ export default function App() {
         }
       }
     } else {
-      return (
-        <Image style={styles.cellImg} source={require('./assets/light_grey-02-01.png')}/>
-      )
+      if (board[x][y].flag) {
+        return <Image style={styles.cellImg} source={require('./assets/flag_kenu_testi_1-01.png')}/>;
+      } else {
+        return <Image style={styles.cellImg} source={require('./assets/light_grey-02-01.png')}/>;
+      }
     }
   }
 
@@ -288,13 +355,31 @@ export default function App() {
       {board && board.map((row, index_x) =>
         <View key={index_x} style={{flexDirection: 'row'}}>
           {row.map((item, index_y) =>
-            <TouchableHighlight key={index_x + '-' + index_y} onPress={() => openCell(index_x, index_y)}>
+            <TouchableHighlight key={index_x + '-' + index_y} onLongPress={() => {
+              if(!game.lost) {
+                flagCell(index_x, index_y)
+              }
+            }} onPress={() => {
+              if (!board[index_x][index_y].flag && !game.lost) {
+                openCell(index_x, index_y);
+              }
+              
+            }}>
               {getImage(index_x, index_y)}
             </TouchableHighlight>
           )}
         </View>
       )}
-      <Button title='Reset' onPress={createBoard}/>
+      <Button title='Reset' onPress={() => {
+        createBoard();
+        setupGame();
+      }}/>
+
+
+        <Text style={styles.message}>
+          {game.message}
+        </Text>
+
     </View>
   )
 }
@@ -309,5 +394,11 @@ const styles = StyleSheet.create({
   cellImg: {
     width: 34,
     height: 34
+  },
+  message: {
+    fontSize: 22,
+    fontWeight: 600,
+    marginBottom: 8,
+    display: 'block'
   }
 });
