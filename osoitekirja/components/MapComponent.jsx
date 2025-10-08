@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
+import { Button } from '@rneui/themed';
 
 export default function MapComponent({ route }) {
   const { location } = route.params;
+  const [coords, setCoords] = useState({});
 
-  const [coords, setCoords] = useState({})
+  const mapRef = useRef();
 
   useEffect(() => {
     setCoords({
@@ -16,13 +18,21 @@ export default function MapComponent({ route }) {
     })
   }, [])
 
-  console.log(location)
+  const showLocation = () => {
+    mapRef.current.animateToRegion({
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+      latitudeDelta: coords.latitudeDelta,
+      longitudeDelta: coords.longitudeDelta
+    })
+  }
 
   return (
     <View>
       <MapView
-        style={{ width: '100%', height: '100%' }}
-        region={coords}>
+        style={{ width: '100%', height: '92%' }}
+        region={coords}
+        ref={mapRef}>
         <Marker
           coordinate={{
             latitude: location.lat,
@@ -31,6 +41,10 @@ export default function MapComponent({ route }) {
           title={location.name}
         />
       </MapView>
+      <Button
+        title="SHOW"
+        onPress={showLocation}
+      />
     </View>
   )
 }

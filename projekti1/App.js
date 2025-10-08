@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useRef, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View, TextInput, Pressable, FlatList, Image, TouchableHighlight, Button } from 'react-native';
 
 const DIFFICULTY = 'beginner';
@@ -15,8 +15,12 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    checkWin()
+    if (!game.win) {
+      checkWin()
+    }
+
   }, [board])
+
 
   const setupGame = () => {
     setGame({
@@ -181,7 +185,7 @@ export default function App() {
       })
 
       if (win) {
-        setGame({...game, win: true, message: 'YOU WIN!'})
+        setGame({...game, win: true, message: 'YOU WIN!'});
       }
     }
 
@@ -360,7 +364,7 @@ export default function App() {
                 flagCell(index_x, index_y)
               }
             }} onPress={() => {
-              if (!board[index_x][index_y].flag && !game.lost) {
+              if (!board[index_x][index_y].flag && !game.lost && !game.win) {
                 openCell(index_x, index_y);
               }
               
